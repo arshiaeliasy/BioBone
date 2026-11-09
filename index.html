@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>آزمایشگاه تعاملی استخوان‌شناسی</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef3f4;--surf:#fff;--ink:#14303b;--mute:#51707b;--line:#cddbdf;--acc:#0f766e;--accbg:#d5efeb;--bone:#e9dcc3;--bone2:#cdb98f;--red:#b4332e;--ok:#1b7f4b;--okbg:#dcf3e4;--badbg:#f8dedc;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1c21;--surf:#172a31;--ink:#e6f0f2;--mute:#97b3bb;--line:#2b434c;--acc:#4fd1c0;--accbg:#173f3b;--bone:#d8c9a8;--bone2:#a8955f;--red:#f08a84;--ok:#6fd49a;--okbg:#17382a;--badbg:#44211f}}
+:root[data-theme="dark"]{--bg:#0f1c21;--surf:#172a31;--ink:#e6f0f2;--mute:#97b3bb;--line:#2b434c;--acc:#4fd1c0;--accbg:#173f3b;--bone:#d8c9a8;--bone2:#a8955f;--red:#f08a84;--ok:#6fd49a;--okbg:#17382a;--badbg:#44211f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Vazirmatn",Tahoma,sans-serif;line-height:1.9;font-size:16px}
+header{padding:28px 20px 8px;max-width:980px;margin:auto}
+h1{margin:0;font-size:clamp(1.6rem,5vw,2.4rem);font-weight:800}
+header p{margin:4px 0 0;color:var(--mute)}
+nav{display:flex;gap:6px;overflow-x:auto;max-width:980px;margin:14px auto 0;padding:0 20px 8px;scrollbar-width:thin}
+nav button{flex:none;font:inherit;font-size:.9rem;padding:6px 14px;border:1.5px solid var(--line);background:var(--surf);color:var(--ink);border-radius:999px;cursor:pointer}
+nav button[aria-selected=true]{background:var(--acc);color:var(--bg);border-color:var(--acc);font-weight:600}
+button:focus-visible,.hot:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+main{max-width:980px;margin:auto;padding:8px 20px 48px}
+section{display:none;background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:20px}
+section.on{display:block}
+h2{margin:0 0 6px;font-size:1.35rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:14px}
+.card{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--bg)}
+.card b{display:block}
+.card span{color:var(--mute);font-size:.92rem}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.btns button,.opt{font:inherit;padding:8px 14px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;cursor:pointer}
+.btns button[aria-pressed=true]{border-color:var(--acc);background:var(--accbg);font-weight:600}
+.info{border-right:4px solid var(--acc);background:var(--accbg);padding:10px 14px;border-radius:8px;min-height:84px}
+.split{display:grid;grid-template-columns:minmax(200px,280px) 1fr;gap:20px;align-items:start}
+@media(max-width:640px){.split{grid-template-columns:1fr}}
+svg{width:100%;max-width:280px;height:auto;display:block;margin:auto}
+.hot{cursor:pointer;transition:opacity .15s}
+.hot:hover{opacity:.8}
+.hot.sel{stroke:var(--acc);stroke-width:3}
+.bar{height:26px;border-radius:8px;overflow:hidden;display:flex;border:1px solid var(--line);margin:10px 0}
+.bar div{transition:flex-basis .5s;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff;white-space:nowrap}
+.rod{height:34px;border-radius:17px;background:var(--bone2);margin:10px auto;transition:transform .6s,background .4s;transform-origin:right center;max-width:360px}
+.rod.soft{transform:rotate(-38deg) scaleX(.92);background:#8fa6a0}
+.rod.brit{background:#e6e1d6;clip-path:polygon(0 0,46% 0,50% 60%,54% 0,100% 0,100% 100%,0 100%)}
+input[type=range]{width:100%;accent-color:var(--acc)}
+.q{margin:14px 0}
+.opts{display:grid;gap:8px;margin-top:8px}
+.opt{text-align:right}
+.opt.ok{background:var(--okbg);border-color:var(--ok)}
+.opt.bad{background:var(--badbg);border-color:var(--red)}
+.exp{margin-top:8px;color:var(--mute);font-size:.93rem}
+.score{font-weight:800;font-size:1.2rem}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+#c3{height:460px;border:1px solid var(--line);border-radius:12px;background:var(--bg);touch-action:none;cursor:grab;overflow:hidden}
+#c3 canvas{display:block;width:100%!important}
+</style>
+</head>
+<body>
+<header>
+  <h1>آزمایشگاه تعاملی استخوان‌شناسی</h1>
+  <p>سازنده: آرزو اسماعیل نیا دبیر زیست شناسی</p>
+  <p>بخش‌ها را لمس کنید، آزمایش‌ها را اجرا کنید و خودتان را بسنجید.</p>
+</header>
+<nav role="tablist" id="tabs"></nav>
+<main>
+<section id="s0">
+<h2>وظایف و ترکیب استخوان</h2>
+<div class="grid" id="funcs"></div>
+<h2 style="margin-top:22px">استخوان از چه ساخته شده است؟</h2>
+<p>استخوان ترکیبی از ماده آلی (کلاژن) و ماده معدنی (کلسیم و فسفات) است. با آزمایش زیر ببینید هر کدام چه نقشی دارد.</p>
+<div class="bar"><div style="flex-basis:35%;background:#0f766e">ماده آلی ۳۵٪</div><div style="flex-basis:65%;background:#7a6a43">ماده معدنی ۶۵٪</div></div>
+<div class="btns" id="lab"><button data-m="" aria-pressed="true">استخوان سالم</button><button data-m="soft" aria-pressed="false">حل کردن مواد معدنی (در اسید)</button><button data-m="brit" aria-pressed="false">سوزاندن مواد آلی (با حرارت)</button></div>
+<div class="rod" id="rod"></div>
+<div class="info" id="labinfo">استخوان سالم هم محکم است و هم کمی انعطاف دارد.</div>
+</section>
+
+<section id="s1">
+<h2>ساختار استخوان دراز</h2>
+<p>روی هر بخش از استخوان بزنید.</p>
+<div class="split">
+<svg viewBox="0 0 240 420" role="img" aria-label="استخوان دراز" id="bone"></svg>
+<div><div class="btns" id="bonebtns"></div><div class="info" id="boneinfo">یک بخش را انتخاب کنید.</div></div>
+</div>
+</section>
+
+<section id="s2">
+<h2>سلول‌های استخوانی</h2>
+<p>سه نوع سلول استخوان را هم‌زمان می‌سازند، نگه می‌دارند و بازسازی می‌کنند.</p>
+<div class="btns" id="cellbtns"></div>
+<div class="info" id="cellinfo"></div>
+</section>
+
+<section id="s3">
+<h2>انواع استخوان‌ها</h2>
+<div class="btns" id="typebtns"></div>
+<div class="info" id="typeinfo"></div>
+</section>
+
+<section id="s4">
+<h2>رشد و بازسازی استخوان</h2>
+<p>سن را تغییر دهید و ضخامت غضروف صفحه رشد را ببینید.</p>
+<label for="age">سن: <b id="agev">5</b> سال</label>
+<input type="range" id="age" min="0" max="25" value="5">
+<div style="display:flex;align-items:center;gap:14px;margin:12px 0">
+<div style="flex:none;width:90px;height:60px;background:var(--bone2);border-radius:8px;position:relative"><div id="plate" style="position:absolute;top:26px;left:0;right:0;background:var(--acc);height:10px;transition:height .3s,opacity .3s"></div></div>
+<div class="info" id="ageinfo" style="flex:1"></div></div>
+<h2 style="margin-top:20px">بازسازی همیشگی</h2>
+<p>استخوان هیچ‌وقت ثابت نمی‌ماند. این چرخه در تمام عمر تکرار می‌شود:</p>
+<div class="grid"><div class="card"><b>۱. تخریب</b><span>استئوکلاست‌ها بخش فرسوده را برمی‌دارند.</span></div><div class="card"><b>۲. ساخت</b><span>استئوبلاست‌ها ماده جدید می‌سازند.</span></div><div class="card"><b>۳. استقرار</b><span>استئوبلاست‌ها در ماده ساخته‌شده گرفتار و به استئوسیت تبدیل می‌شوند.</span></div></div>
+<p>کلسیم و ویتامین D و ورزش بدنی منظم این چرخه را سالم نگه می‌دارند.</p>
+</section>
+
+<section id="s5">
+<h2>آزمون مفهومی</h2>
+<div id="quiz"></div>
+<div id="res" class="score"></div>
+<div class="btns"><button id="redo" style="display:none">شروع دوباره</button></div>
+</section>
+<section id="s6"><h2>اسکلت سه‌بعدی</h2><p>برای چرخاندن، روی اسکلت بکشید. برای دیدن نام و نوع هر استخوان، روی آن بزنید.</p><div id="c3"></div><div class="btns"><button id="auto" aria-pressed="true">چرخش خودکار</button></div><div class="info" id="i3">یک استخوان را انتخاب کنید.</div></section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const tabs = ["وظایف و ترکیب", "ساختار", "سلول‌ها", "انواع", "رشد و بازسازی", "آزمون", "اسکلت ۳بعدی"];
+
+tabs.forEach((t, i) => {
+  const b = document.createElement("button");
+  b.textContent = t;
+  b.setAttribute("role", "tab");
+  b.onclick = () => showTab(i);
+  $("tabs").appendChild(b);
+});
+
+function showTab(n) {
+  Array.from($("tabs").children).forEach((b, i) => b.setAttribute("aria-selected", i == n));
+  for (let i = 0; i < 7; i++) {
+    $("s" + i).classList.toggle("on", i == n);
+  }
+  if (n === 6) {
+    init3d();
+  } else {
+    stop3d();
+  }
+}
+showTab(0);
+
+const F = [
+  ["تکیه‌گاه", "چارچوب بدن را می‌سازد و شکل آن را نگه می‌دارد."],
+  ["محافظت", "جمجمه مغز را و قفسه سینه قلب و شش‌ها را می‌پوشاند."],
+  ["حرکت", "ماهیچه‌ها به استخوان‌ها متصل‌اند و با کشیدن آن‌ها حرکت می‌سازند."],
+  ["تولید سلول‌های خونی", "مغز قرمز استخوان گلبول‌های قرمز و سفید و پلاکت می‌سازد."],
+  ["ذخیره مواد معدنی", "کلسیم و فسفر را ذخیره و در صورت نیاز به خون آزاد می‌کند."]
+];
+$("funcs").innerHTML = F.map(f => `<div class="card"><b>${f[0]}</b><span>${f[1]}</span></div>`).join("");
+
+const L = {
+  "": "استخوان سالم هم محکم است و هم کمی انعطاف دارد.",
+  soft: "با حل شدن مواد معدنی، استخوان نرم و خمیده می‌شود و استحکامش را از دست می‌دهد. پس سختی استخوان از مواد معدنی است.",
+  brit: "با سوختن مواد آلی، استخوان ترد و شکننده می‌شود و با کمی فشار خرد می‌شود. پس انعطاف استخوان از مواد آلی است."
+};
+Array.from($("lab").children).forEach(b => {
+  b.onclick = () => {
+    Array.from($("lab").children).forEach(x => x.setAttribute("aria-pressed", x == b));
+    $("rod").className = "rod " + b.dataset.m;
+    $("labinfo").textContent = L[b.dataset.m];
+  };
+});
+
+const P = [
+  ["cart", "غضروف مفصلی", "لایه صاف و لغزنده روی انتهای استخوان. اصطکاک را در مفصل کم و ضربه را جذب می‌کند.", "#8fc4d9", "M60 38 Q120 6 180 38 L180 52 L60 52 Z"],
+  ["spongy", "استخوان اسفنجی", "در دو سر استخوان قرار دارد و پر از حفره است. سبک و مقاوم در برابر فشار است و مغز قرمز استخوان در حفره‌های آن است.", "#d9a77a", "M60 52 L180 52 Q192 80 170 108 L70 108 Q48 80 60 52 Z"],
+  ["plate", "صفحه رشد", "غضروفی که در کودکی و نوجوانی بین سر و تنه استخوان است. رشد طولی استخوان از اینجا انجام می‌شود و بعد از بلوغ به استخوان تبدیل می‌شود.", "#2a9d8f", "M72 108 H168 V118 H72 Z"],
+  ["compact", "استخوان فشرده", "دیواره سخت و متراکم تنه استخوان است. بیشترین استحکام را دارد و بار اصلی را تحمل می‌کند.", "#a8955f", "M88 118 H152 V300 H88 Z"],
+  ["marrow", "حفره مغز استخوان", "حفره‌ای در مرکز تنه که مغز زرد (چربی ذخیره) در آن است.", "#f0d36b", "M108 118 H132 V300 H108 Z"],
+  ["peri", "پریوست (غشای پیراستخوان)", "غشای نازک و پرعروق که استخوان را می‌پوشاند. تغذیه و ترمیم استخوان و رشد قطری آن به عهده آن است.", "#b4332e", "M84 118 H88 V300 H84 Z M152 118 H156 V300 H152 Z"]
+];
+
+let sv = P.map(p => `<path class="hot" tabindex="0" role="button" aria-label="${p[1]}" data-i="${p[0]}" d="${p[4]}" fill="${p[3]}" stroke="#14303b" stroke-width="1"/>`).join("");
+sv += '<path d="M72 300 H168 V310 H72 Z" fill="#2a9d8f" opacity=".5"/><path d="M60 310 L180 310 Q192 340 170 366 L70 366 Q48 340 60 310 Z" fill="#d9a77a" opacity=".5"/><path d="M60 366 Q120 396 180 366 L180 352 L60 352 Z" fill="#8fc4d9" opacity=".5"/>';
+$("bone").innerHTML = sv;
+
+function pickBone(id) {
+  const p = P.find(x => x[0] === id);
+  if (!p) return;
+  $("boneinfo").innerHTML = `<b>${p[1]}</b><br>${p[2]}`;
+  document.querySelectorAll(".hot").forEach(e => e.classList.toggle("sel", e.dataset.i === id));
+  Array.from($("bonebtns").children).forEach(b => b.setAttribute("aria-pressed", b.dataset.i === id));
+}
+
+document.querySelectorAll(".hot").forEach(e => {
+  e.onclick = () => pickBone(e.dataset.i);
+  e.onkeydown = k => {
+    if (k.key === "Enter" || k.key === " ") {
+      k.preventDefault();
+      pickBone(e.dataset.i);
+    }
+  };
+});
+
+P.forEach(p => {
+  const b = document.createElement("button");
+  b.textContent = p[1];
+  b.dataset.i = p[0];
+  b.setAttribute("aria-pressed", "false");
+  b.onclick = () => pickBone(p[0]);
+  $("bonebtns").appendChild(b);
+});
+
+function setupTabGroup(btnsId, infoId, data) {
+  data.forEach((d, i) => {
+    const b = document.createElement("button");
+    b.textContent = d[0];
+    b.setAttribute("aria-pressed", "false");
+    b.onclick = () => {
+      Array.from($(btnsId).children).forEach(x => x.setAttribute("aria-pressed", x == b));
+      $(infoId).innerHTML = d[1];
+    };
+    $(btnsId).appendChild(b);
+    if (i === 0) b.click();
+  });
+}
+
+setupTabGroup("cellbtns", "cellinfo", [
+  ["استئوبلاست", "<b>سازنده استخوان</b><br>ماده زمینه استخوان (کلاژن) را می‌سازد و کلسیم را در آن رسوب می‌دهد. در رشد و ترمیم شکستگی بسیار فعال است."],
+  ["استئوسیت", "<b>نگهبان استخوان</b><br>استئوبلاستی است که در ماده ساخته‌شده گرفتار شده و به سلول بالغ تبدیل شده است. تبادل مواد و پایش سلامت بافت را انجام می‌دهد."],
+  ["استئوکلاست", "<b>تخریب‌کننده استخوان</b><br>سلول بزرگ و چندهسته‌ای که ماده استخوانی فرسوده را حل می‌کند. در بازسازی و آزاد کردن کلسیم به خون نقش دارد."]
+]);
+
+setupTabGroup("typebtns", "typeinfo", [
+  ["دراز", "<b>استخوان دراز</b><br>طول آن از عرضش بیشتر است. مثال: ران، ساق، بازو و ساعد. برای حرکت اهرمی مناسب‌اند."],
+  ["کوتاه", "<b>استخوان کوتاه</b><br>تقریباً مکعبی‌اند. مثال: استخوان‌های مچ دست و مچ پا. تحمل فشار و حرکت‌های ظریف را دارند."],
+  ["پهن", "<b>استخوان پهن</b><br>صاف و نازک‌اند. مثال: جمجمه، کتف، جناغ و دنده. از اندام‌های داخلی محافظت می‌کنند."],
+  ["نامنظم", "<b>استخوان نامنظم</b><br>شکل پیچیده دارند. مثال: مهره‌ها و برخی استخوان‌های صورت."]
+]);
+
+function updateAge() {
+  const a = +$("age").value;
+  $("agev").textContent = a;
+  const h = a <= 12 ? 10 : Math.max(0, Math.round(10 - (a - 12) * 0.8));
+  $("plate").style.height = h + "px";
+  $("plate").style.opacity = h ? 1 : 0;
+  $("ageinfo").textContent = a <= 2 ? "نوزادی و خردسالی: بیشتر اسکلت غضروفی یا نرم است و رشد بسیار سریع است." :
+    a <= 12 ? "کودکی: صفحه رشد ضخیم و فعال است و استخوان‌ها هر سال بلندتر می‌شوند." :
+    a <= 19 ? "نوجوانی: جهش رشد رخ می‌دهد و سپس صفحه‌های رشد کم‌کم نازک می‌شوند." :
+    "جوانی: صفحه رشد به استخوان تبدیل شده و رشد طولی تمام شده است. بازسازی ادامه دارد.";
+}
+$("age").oninput = updateAge;
+updateAge();
+
+const Q = [
+  ["کدام سلول وظیفه ساخت ماده استخوانی را دارد؟", ["استئوکلاست", "استئوبلاست", "گلبول سفید", "سلول عصبی"], 1, "استئوبلاست‌ها کلاژن می‌سازند و کلسیم را رسوب می‌دهند. استئوکلاست‌ها برعکس، ماده استخوانی را حل می‌کنند."],
+  ["گلبول‌های خونی در کدام بخش ساخته می‌شوند؟", ["پریوست", "غضروف مفصلی", "مغز قرمز استخوان", "مغز زرد استخوان"], 2, "مغز قرمز در حفره‌های استخوان اسفنجی قرار دارد. مغز زرد بیشتر چربی ذخیره می‌کند."],
+  ["رشد طولی استخوان دراز در کودکی از کجا انجام می‌شود؟", ["پریوست", "صفحه رشد", "استخوان فشرده", "حفره مغز"], 1, "صفحه رشد غضروفی است و با تقسیم و تبدیل به استخوان، طول را زیاد می‌کند. پریوست در رشد قطری نقش دارد."],
+  ["استخوان کتف از کدام نوع است؟", ["دراز", "کوتاه", "پهن", "نامنظم"], 2, "کتف صاف و نازک است و از اندام‌های داخلی محافظت می‌کند، پس پهن است."],
+  ["اگر مواد معدنی استخوان در اسید حل شود، چه می‌شود؟", ["ترد می‌شود", "نرم و انعطاف‌پذیر می‌شود", "سخت‌تر می‌شود", "تغییری نمی‌کند"], 1, "مواد معدنی سختی را تأمین می‌کنند. با نبودشان فقط کلاژن می‌ماند و استخوان خم می‌شود."],
+  ["مهره‌های ستون فقرات از کدام نوع استخوان‌اند؟", ["دراز", "کوتاه", "پهن", "نامنظم"], 3, "مهره‌ها شکل پیچیده دارند و در هیچ‌یک از سه گروه دیگر نمی‌گنجند، پس نامنظم‌اند."],
+  ["رشد قطری (ضخامت) استخوان دراز به کدام بخش وابسته است؟", ["پریوست", "صفحه رشد", "مغز زرد", "غضروف مفصلی"], 0, "سلول‌های لایه درونی پریوست استخوان جدید را روی سطح بیرونی می‌سازند و قطر را زیاد می‌کنند."],
+  ["کدام ویتامین به جذب کلسیم از روده کمک می‌کند؟", ["ویتامین A", "ویتامین C", "ویتامین D", "ویتامین K"], 2, "ویتامین D جذب کلسیم را بالا می‌برد؛ کمبود آن در کودکان به نرمی استخوان (راشیتیسم) می‌انجامد."],
+  ["کدام استخوان دراز است؟", ["کشکک", "ران", "کتف", "مهره"], 1, "استخوان ران طولش از عرضش بسیار بیشتر است. کشکک کوتاه، کتف پهن و مهره نامنظم است."],
+  ["استئوسیت چگونه به وجود می‌آید؟", ["از استئوکلاست", "از گلبول قرمز", "از استئوبلاستی که در ماده استخوانی گرفتار شده", "از غضروف مفصلی"], 2, "استئوبلاست‌ها پس از ساخت ماده زمینه در آن محبوس می‌شوند و به استئوسیت بالغ تبدیل می‌شوند."]
+];
+
+let done = 0, sc = 0;
+function buildQuiz() {
+  sc = 0;
+  done = 0;
+  $("res").textContent = "";
+  $("redo").style.display = "none";
+  $("quiz").innerHTML = "";
+  Q.forEach((q, qi) => {
+    const d = document.createElement("div");
+    d.className = "q";
+    d.innerHTML = `<b>سؤال ${qi + 1}: ${q[0]}</b>`;
+    const o = document.createElement("div");
+    o.className = "opts";
+    const ex = document.createElement("div");
+    ex.className = "exp";
+    q[1].forEach((t, i) => {
+      const b = document.createElement("button");
+      b.className = "opt";
+      b.textContent = t;
+      b.onclick = () => {
+        if (d.dataset.a) return;
+        d.dataset.a = "1";
+        const ok = i === q[2];
+        if (ok) sc++;
+        b.classList.add(ok ? "ok" : "bad");
+        if (!ok) o.children[q[2]].classList.add("ok");
+        ex.textContent = (ok ? "درست! " : "نادرست. ") + q[3];
+        done++;
+        if (done === Q.length) finishQuiz();
+      };
+      o.appendChild(b);
+    });
+    d.appendChild(o);
+    d.appendChild(ex);
+    $("quiz").appendChild(d);
+  });
+}
+$("redo").onclick = buildQuiz;
+buildQuiz();
+
+function finishQuiz() {
+  let p = sc * 2, m = p >= 18 ? "عالی! به این مبحث مسلط هستید." : p >= 14 ? "خیلی خوب. چند نکته را مرور کنید." : p >= 10 ? "قابل قبول. بخش‌های سلول‌ها و رشد را دوباره ببینید." : "بهتر است بخش‌ها را مرور کنید و دوباره آزمون بدهید.";
+  let b = p;
+  try {
+    b = Math.max(+localStorage.getItem("osb") || 0, p);
+    localStorage.setItem("osb", b);
+  } catch (e) {}
+  $("res").textContent = `نمره شما: ${p} از 20. ${m} (بهترین نمره: ${b})`;
+  $("redo").style.display = "inline-block";
+}
+
+// 3D Skeleton Logic (Optimized)
+let T3 = null, AUTO = true, animId = null, scene, camera, renderer, groupMesh;
+let meshes = [], selectedMesh = null, isDragging = false, lastX = 0, lastY = 0, startX = 0, startY = 0;
+
+function init3d() {
+  if (T3 || !window.THREE) {
+    if (!window.THREE) $("c3").textContent = "بارگذاری نمایش سه‌بعدی ممکن نشد. اتصال اینترنت را بررسی کنید.";
+    return;
+  }
+  T3 = 1;
+  const box = $("c3");
+  const H = 460;
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  box.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+  camera.position.set(0, 0, 17);
+
+  function fitCanvas() {
+    const W = box.clientWidth;
+    renderer.setSize(W, H);
+    camera.aspect = W / H;
+    camera.updateProjectionMatrix();
+  }
+  fitCanvas();
+  window.addEventListener("resize", fitCanvas);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.7);
+  dirLight.position.set(3, 6, 8);
+  scene.add(dirLight);
+
+  groupMesh = new THREE.Group();
+  scene.add(groupMesh);
+  meshes = [];
+
+  function addMesh(n, t, g, x, y, z, rx, ry, rz) {
+    const m = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color: 0xe9dcc3 }));
+    m.position.set(x, y, z);
+    m.rotation.set(rx || 0, ry || 0, rz || 0);
+    m.userData = { n, t };
+    groupMesh.add(m);
+    meshes.push(m);
+    return m;
+  }
+
+  function cyGeom(r, h) { return new THREE.CylinderGeometry(r, r * 0.85, h, 12); }
+
+  const sk = addMesh("جمجمه", "پهن", new THREE.SphereGeometry(0.6, 20, 16), 0, 4.4, 0);
+  sk.scale.set(0.9, 1.05, 1);
+  addMesh("فک پایین", "نامنظم", new THREE.BoxGeometry(0.5, 0.18, 0.4), 0, 3.85, 0.25);
+  addMesh("مهره‌های گردنی", "نامنظم", cyGeom(0.14, 0.8), 0, 3.4, 0);
+  addMesh("مهره‌های سینه‌ای", "نامنظم", cyGeom(0.17, 2.1), 0, 2.0, 0);
+  addMesh("مهره‌های کمری", "نامنظم", cyGeom(0.2, 1), 0, 0.55, 0);
+  addMesh("استخوان خاجی (ساکروم)", "نامنظم", new THREE.BoxGeometry(0.5, 0.55, 0.3), 0, -0.1, -0.05);
+  addMesh("جناغ سینه", "پهن", new THREE.BoxGeometry(0.22, 1.3, 0.07), 0, 2.4, 0.66);
+
+  for (let k = 0; k < 6; k++) {
+    const r = addMesh("دنده‌ها", "پهن", new THREE.TorusGeometry(0.5 + 0.09 * k, 0.045, 8, 28), 0, 3.0 - k * 0.27, 0, Math.PI / 2);
+    r.scale.set(1, 0.75, 1);
+  }
+
+  [-1, 1].forEach(s => {
+    addMesh("ترقوه", "دراز", cyGeom(0.06, 1.1), s * 0.6, 3.1, 0.3, 0, 0, Math.PI / 2 + s * 0.12);
+    addMesh("کتف", "پهن", new THREE.BoxGeometry(0.6, 0.8, 0.06), s * 0.8, 2.7, -0.5);
+    addMesh("استخوان بازو", "دراز", cyGeom(0.1, 1.6), s * 1.3, 2.3, 0);
+    addMesh("استخوان‌های ساعد (زندزبرین و زندزیرین)", "دراز", cyGeom(0.085, 1.5), s * 1.3, 0.75, 0);
+    addMesh("استخوان‌های دست", "کوتاه", new THREE.BoxGeometry(0.32, 0.55, 0.1), s * 1.3, -0.3, 0);
+    addMesh("استخوان لگن", "پهن", new THREE.BoxGeometry(0.7, 0.75, 0.35), s * 0.55, 0.15, 0, 0, 0, s * 0.25);
+    addMesh("استخوان ران", "دراز", cyGeom(0.14, 2.3), s * 0.55, -1.6, 0);
+    addMesh("کشکک", "کوتاه", new THREE.SphereGeometry(0.14, 10, 8), s * 0.55, -2.8, 0.18);
+    addMesh("استخوان درشت‌نی (ساق)", "دراز", cyGeom(0.11, 2.1), s * 0.55, -3.95, 0);
+    addMesh("استخوان‌های پا", "کوتاه", new THREE.BoxGeometry(0.32, 0.16, 0.65), s * 0.55, -5.1, 0.25);
+  });
+  groupMesh.position.y = -0.2;
+
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  const cv = renderer.domElement;
+
+  cv.onpointerdown = e => {
+    isDragging = true;
+    lastX = startX = e.clientX;
+    lastY = startY = e.clientY;
+    cv.setPointerCapture(e.pointerId);
+    box.style.cursor = "grabbing";
+  };
+
+  cv.onpointermove = e => {
+    if (!isDragging) return;
+    groupMesh.rotation.y += (e.clientX - lastX) * 0.01;
+    groupMesh.rotation.x = Math.max(-0.5, Math.min(0.5, groupMesh.rotation.x + (e.clientY - lastY) * 0.005));
+    lastX = e.clientX;
+    lastY = e.clientY;
+  };
+
+  cv.onpointerup = e => {
+    isDragging = false;
+    box.style.cursor = "grab";
+    if (Math.abs(e.clientX - startX) + Math.abs(e.clientY - startY) > 6) return;
+    const b = cv.getBoundingClientRect();
+    mouse.set((e.clientX - b.left) / b.width * 2 - 1, -((e.clientY - b.top) / b.height) * 2 + 1);
+    raycaster.setFromCamera(mouse, camera);
+    const hit = raycaster.intersectObjects(meshes)[0];
+    if (selectedMesh) selectedMesh.material.emissive.setHex(0);
+    if (hit) {
+      selectedMesh = hit.object;
+      selectedMesh.material.emissive.setHex(0x1c9c8f);
+      $("i3").innerHTML = `<b>${selectedMesh.userData.n}</b><br>نوع: استخوان ${selectedMesh.userData.t}`;
+    } else {
+      selectedMesh = null;
+      $("i3").textContent = "یک استخوان را انتخاب کنید.";
+    }
+  };
+
+  $("auto").onclick = function() {
+    AUTO = !AUTO;
+    this.setAttribute("aria-pressed", AUTO);
+  };
+
+  if (matchMedia("(prefers-reduced-motion:reduce)").matches) {
+    AUTO = false;
+    $("auto").setAttribute("aria-pressed", "false");
+  }
+
+  function loop() {
+    animId = requestAnimationFrame(loop);
+    if (AUTO && !isDragging) groupMesh.rotation.y += 0.006;
+    renderer.render(scene, camera);
+  }
+  loop();
+}
+
+function stop3d() {
+  if (animId) {
+    cancelAnimationFrame(animId);
+    animId = null;
+  }
+}
+</script>
+</body>
+</html>
